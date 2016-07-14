@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ibm-watson-text="http://www.mulesoft.org/schema/mule/ibm-watson-text" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:twitter="http://www.mulesoft.org/schema/mule/twitter" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/current/mule-twitter.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ibm-watson-text http://www.mulesoft.org/schema/mule/ibm-watson-text/current/mule-ibm-watson-text.xsd">
+    <twitter:config name="Twitter__Configuration" accessKey="250841807-tRKRCDXHPHw3j6ZKLgxDJURRT42HmFhc9gfr3Jwj" accessSecret="LYDxzNYCxztff09QBUm19hEcPFekT3Fozg8BxN2OxHSDT" consumerKey="k8OVhxPNirNyKb0ttw6W1x6zX" consumerSecret="B8OcoMZw3RRCCOl0HjQJvujlSj34ayuZehCRsxSbaNIzrBxPD4" doc:name="Twitter: Configuration"/>
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <ibm-watson-text:config name="IBM_Watson_Text_Processor__Configuration" apiKey="${watson-token}" doc:name="IBM Watson Text Processor: Configuration"/>
+    <mongo:config name="Mongo_DB__Configuration" database="muledemo" host="192.168.99.100:27017" doc:name="Mongo DB: Configuration"/>
+</mule>

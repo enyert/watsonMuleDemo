@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {},
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "Mongo_DB__Configuration",
+            "typeId": "org.bson.Document"
+        }
+    },
+    "id": "44f33752-989e-4203-8851-cb5a184484fd",
+    "version": "5.2.0.0"
+}

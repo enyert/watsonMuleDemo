@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "Twitter__Configuration",
+            "typeId": "twitter4j.QueryResult"
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "d1948bfe-adae-49f8-9dd2-48336433f095",
+    "version": "5.2.0.0"
+}

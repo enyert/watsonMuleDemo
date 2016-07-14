@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:ibm-watson-text="http://www.mulesoft.org/schema/mule/ibm-watson-text" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ibm-watson="http://www.mulesoft.org/schema/mule/ibm-watson" xmlns:twitter="http://www.mulesoft.org/schema/mule/twitter" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/current/mule-twitter.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ibm-watson http://www.mulesoft.org/schema/mule/ibm-watson/current/mule-ibm-watson.xsd
+http://www.mulesoft.org/schema/mule/ibm-watson-text http://www.mulesoft.org/schema/mule/ibm-watson-text/current/mule-ibm-watson-text.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd">
+    <batch:job name="ingestTweetsBatch" max-failed-records="-1">
+        <batch:input>
+            <poll doc:name="RetrieveLastTweets">
+                <fixed-frequency-scheduler frequency="1" startDelay="999999" timeUnit="MINUTES"/>
+                <flow-ref name="getTweets" doc:name="getTweets"/>
+            </poll>
+        </batch:input>
+        <batch:process-records>
+            <batch:step name="ProcessTweet">
+                <flow-ref name="processTweetInWatson" doc:name="processTweetInWatson"/>
+            </batch:step>
+            <batch:step name="SaveToMongo">
+                <flow-ref name="saveTweetAnalizedInMongo" doc:name="saveTweetAnalizedInMongo"/>
+            </batch:step>
+        </batch:process-records>
+    </batch:job>
+    <sub-flow name="getTweets">
+        <flow-ref name="retrieveTwitterConfig" doc:name="retrieveTwitterConfig"/>
+        <twitter:search config-ref="Twitter__Configuration" query="#[payload.twitterQuery]" doc:name="LastesTweetByQuery"/>
+        <dw:transform-message metadata:id="d1948bfe-adae-49f8-9dd2-48336433f095" doc:name="getOnlyTweets">
+            <dw:input-payload/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+[
+	payload.tweets[0]
+]
+]]></dw:set-payload>
+        </dw:transform-message>
+    </sub-flow>
+</mule>

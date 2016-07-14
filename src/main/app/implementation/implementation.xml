@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ibm-watson-text="http://www.mulesoft.org/schema/mule/ibm-watson-text"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ibm-watson-text http://www.mulesoft.org/schema/mule/ibm-watson-text/current/mule-ibm-watson-text.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="processTweetInWatson">
+		<batch:set-record-variable variableName="tweet"
+			value="#[payload]" doc:name="SetTweet" />
+        <logger message="#[recordVars.tweet]" level="INFO" doc:name="Logger"/>
+		<ibm-watson-text:process-text
+			config-ref="IBM_Watson_Text_Processor__Configuration" message="#[payload.text]"
+			doc:name="Process Tweet" />
+	</sub-flow>
+	<sub-flow name="saveTweetAnalizedInMongo">
+        <dw:transform-message doc:name="consolidatePayload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	author: recordVars.tweet.user.screenName,
+	text: recordVars.tweet.text,
+	createdAt: recordVars.tweet.createdAt,
+	language: payload.language,
+	sentiment: payload.sentiment,
+	categories: payload.categories,
+	concepts: payload.concepts,
+	entities: payload.entities	
+}]]></dw:set-payload>
+        </dw:transform-message>
+		<mongo:save-document config-ref="Mongo_DB__Configuration"
+			doc:name="Save Tweet Analyzed" collection="tweets" />
+	</sub-flow>
+</mule>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <sub-flow name="saveTwitterQuery">
+        <dw:transform-message doc:name="query">
+            <dw:set-variable variableName="query"><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	"type": "TwitterSearch"
+}]]></dw:set-variable>
+        </dw:transform-message>
+        <dw:transform-message doc:name="updateJson">
+            <dw:input-variable doc:sample="sample_data/map_string_string.dwl" variableName="twitterQuery"/>
+            <dw:set-variable variableName="updateJson"><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	"twitterQuery": flowVars.twitterQuery
+}
+]]></dw:set-variable>
+        </dw:transform-message>
+        <mongo:update-documents-by-function config-ref="Mongo_DB__Configuration" collection="config" function="$set" multi="false" element-ref="#[flowVars.updateJson]" query-ref="#[flowVars.query]" doc:name="updateQuery"/>
+        <flow-ref name="retrieveTwitterConfig" doc:name="retrieveTwitterConfig"/>
+    </sub-flow>
+    <sub-flow name="retrieveTwitterConfig">
+        <dw:transform-message doc:name="query">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	"type": "TwitterSearch"
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <mongo:find-documents config-ref="Mongo_DB__Configuration" collection="config" doc:name="getTwitterConfig"/>
+        <dw:transform-message doc:name="getSingleResult">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload[0]]]></dw:set-payload>
+        </dw:transform-message>
+    </sub-flow>
+</mule>
